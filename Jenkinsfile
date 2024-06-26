@@ -9,7 +9,7 @@ pipeline {
     environment {
         NEXUS_VERSION = "nexus3"
         NEXUS_PROTOCOL = "http"
-        NEXUS_URL = "54.153.117.59:8081"
+        NEXUS_URL = "54.183.210.118:8081"
         NEXUS_PORT = "8081"
         NEXUS_REPOSITORY = "vprofile-release"
 	    NEXUS_REPOGRP_ID    = "vprofile-grp-repo"
@@ -54,66 +54,66 @@ pipeline {
             }
         }
 
-        // stage('CODE ANALYSIS with SONARQUBE') {
+        stage('CODE ANALYSIS with SONARQUBE') {
           
-		//   environment {
-        //      scannerHome = tool 'sonarscanner4'
-        //   }
+		  environment {
+             scannerHome = tool 'sonarscanner4'
+          }
 
-        //   steps {
-        //     withSonarQubeEnv('sonar-pro') {
-        //        sh '''${scannerHome}/bin/sonar-scanner -Dsonar.projectKey=vprofile \
-        //            -Dsonar.projectName=vprofile-repo \
-        //            -Dsonar.projectVersion=1.0 \
-        //            -Dsonar.sources=src/ \
-        //            -Dsonar.java.binaries=target/test-classes/com/visualpathit/account/controllerTest/ \
-        //            -Dsonar.junit.reportsPath=target/surefire-reports/ \
-        //            -Dsonar.jacoco.reportsPath=target/jacoco.exec \
-        //            -Dsonar.java.checkstyle.reportPaths=target/checkstyle-result.xml'''
-        //     }
+          steps {
+            withSonarQubeEnv('sonar-pro') {
+               sh '''${scannerHome}/bin/sonar-scanner -Dsonar.projectKey=vprofile \
+                   -Dsonar.projectName=vprofile-repo \
+                   -Dsonar.projectVersion=1.0 \
+                   -Dsonar.sources=src/ \
+                   -Dsonar.java.binaries=target/test-classes/com/visualpathit/account/controllerTest/ \
+                   -Dsonar.junit.reportsPath=target/surefire-reports/ \
+                   -Dsonar.jacoco.reportsPath=target/jacoco.exec \
+                   -Dsonar.java.checkstyle.reportPaths=target/checkstyle-result.xml'''
+            }
 
-        //     timeout(time: 10, unit: 'MINUTES') {
-        //        waitForQualityGate abortPipeline: true
-        //     }
-        //   }
-        // }
+            timeout(time: 10, unit: 'MINUTES') {
+               waitForQualityGate abortPipeline: true
+            }
+          }
+        }
 
-        // stage("Publish to Nexus Repository Manager") {
-        //     steps {
-        //         script {
-        //             pom = readMavenPom file: "pom.xml";
-        //             filesByGlob = findFiles(glob: "target/*.${pom.packaging}");
-        //             echo "${filesByGlob[0].name} ${filesByGlob[0].path} ${filesByGlob[0].directory} ${filesByGlob[0].length} ${filesByGlob[0].lastModified}"
-        //             artifactPath = filesByGlob[0].path;
-        //             artifactExists = fileExists artifactPath;
-        //             if(artifactExists) {
-        //                 echo "*** File: ${artifactPath}, group: ${pom.groupId}, packaging: ${pom.packaging}, version ${pom.version} ARTVERSION";
-        //                 nexusArtifactUploader(
-        //                     nexusVersion: NEXUS_VERSION,
-        //                     protocol: NEXUS_PROTOCOL,
-        //                     nexusUrl: NEXUS_URL,
-        //                     groupId: NEXUS_REPOGRP_ID,
-        //                     version: ARTVERSION,
-        //                     repository: NEXUS_REPOSITORY,
-        //                     credentialsId: NEXUS_CREDENTIAL_ID,
-        //                     artifacts: [
-        //                         [artifactId: pom.artifactId,
-        //                         classifier: '',
-        //                         file: artifactPath,
-        //                         type: pom.packaging],
-        //                         [artifactId: pom.artifactId,
-        //                         classifier: '',
-        //                         file: "pom.xml",
-        //                         type: "pom"]
-        //                     ]
-        //                 );
-        //             } 
-		//     else {
-        //                 error "*** File: ${artifactPath}, could not be found";
-        //             }
-        //         }
-        //     }
-        // }
+        stage("Publish to Nexus Repository Manager") {
+            steps {
+                script {
+                    pom = readMavenPom file: "pom.xml";
+                    filesByGlob = findFiles(glob: "target/*.${pom.packaging}");
+                    echo "${filesByGlob[0].name} ${filesByGlob[0].path} ${filesByGlob[0].directory} ${filesByGlob[0].length} ${filesByGlob[0].lastModified}"
+                    artifactPath = filesByGlob[0].path;
+                    artifactExists = fileExists artifactPath;
+                    if(artifactExists) {
+                        echo "*** File: ${artifactPath}, group: ${pom.groupId}, packaging: ${pom.packaging}, version ${pom.version} ARTVERSION";
+                        nexusArtifactUploader(
+                            nexusVersion: NEXUS_VERSION,
+                            protocol: NEXUS_PROTOCOL,
+                            nexusUrl: NEXUS_URL,
+                            groupId: NEXUS_REPOGRP_ID,
+                            version: ARTVERSION,
+                            repository: NEXUS_REPOSITORY,
+                            credentialsId: NEXUS_CREDENTIAL_ID,
+                            artifacts: [
+                                [artifactId: pom.artifactId,
+                                classifier: '',
+                                file: artifactPath,
+                                type: pom.packaging],
+                                [artifactId: pom.artifactId,
+                                classifier: '',
+                                file: "pom.xml",
+                                type: "pom"]
+                            ]
+                        );
+                    } 
+		    else {
+                        error "*** File: ${artifactPath}, could not be found";
+                    }
+                }
+            }
+        }
 
 
     }
